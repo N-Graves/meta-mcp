@@ -1,7 +1,7 @@
 {
   "name": "meta-mcp",
   "version": "1.0.0",
-  "description": "Minimal MCP server for Meta's official Graph API - Facebook Page posts + Instagram content publishing.",
+  "description": "Minimal MCP server for Meta's official Graph API - Facebook Pages + Instagram",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -17,5 +17,18 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
-  }
+  },
+  "author": "Nathan Graves",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/N-Graves/meta-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "facebook",
+    "instagram",
+    "meta",
+    "model-context-protocol"
+  ]
 }
