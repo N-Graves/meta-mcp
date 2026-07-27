@@ -37,6 +37,49 @@ export class MetaClient {
     return this.post(`/${pageId}/feed`, this.pageAccessToken, { message });
   }
 
+  /**
+   * Comments on one of our own Facebook Page posts.
+   *
+   * This is the link-delivery mechanism, not a nicety: Facebook has
+   * deprioritised posts that send people off-platform since 2018, so the post
+   * body stays link-free and the link goes in the first comment.
+   *
+   * Unlike the other methods here, this one throws on failure rather than
+   * returning Graph's error envelope. A silently-failed comment means a live
+   * post with no route to the product, which is worse than a loud error - and
+   * this needs the pages_manage_engagement permission, which is a realistic
+   * thing for the token to be missing.
+   */
+  async createPostComment(postId: string, message: string): Promise<unknown> {
+    const result = (await this.post(`/${postId}/comments`, this.pageAccessToken, { message })) as {
+      id?: string;
+      error?: { message?: string; type?: string; code?: number };
+    };
+    if (result.error || !result.id) {
+      throw new Error(
+        `createPostComment failed for ${postId}: ${result.error?.message ?? "no comment id returned"}` +
+          (result.error?.code ? ` (code ${result.error.code})` : ""),
+      );
+    }
+    return result;
+  }
+
+  /*
+   * There is deliberately no read-comments method. Probed live 2026-07-27:
+   * every Page read endpoint (/{page}/feed, /me/feed, and by extension
+   * /{post}/comments) returns
+   *   (#10) "This endpoint requires the 'pages_read_engagement' permission or
+   *   the 'Page Public Content Access' feature"
+   * even though debug_token lists pages_read_engagement among the token's
+   * scopes - so the scope is granted but not effective, which points at App
+   * Review rather than at re-auth.
+   *
+   * Note this does NOT apply to writing: the same probe against
+   * POST /{post}/comments got "(#100) Invalid post_id parameter", i.e. it
+   * cleared the permission check and failed on the fake id. Writing a comment
+   * works; reading one back does not. Don't infer one from the other here.
+   */
+
   async getInstagramAccount(igUserId: string): Promise<unknown> {
     return this.get(`/${igUserId}?fields=id,username,name,followers_count`, this.igAccessToken);
   }
