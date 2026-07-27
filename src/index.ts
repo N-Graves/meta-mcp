@@ -45,6 +45,26 @@ const tools: Tool[] = [
     },
   },
   {
+    name: "meta_create_page_comment",
+    description:
+      "Comment on one of our own Facebook Page posts. This is how a product link reaches a Facebook " +
+      "audience: Facebook deprioritises posts that send people off-platform, so publish the post " +
+      "link-free, then call this with the id it returned and the link. Real and immediately live - " +
+      "only call after HITL approval. Requires agent_id (must hold the 'social' capability).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your fleet-board agent id, e.g. 'echo'" },
+        post_id: {
+          type: "string",
+          description: "The post id returned by meta_create_page_post (looks like <pageid>_<postid>)",
+        },
+        message: { type: "string", description: "The comment text - normally the product link plus a line of context" },
+      },
+      required: ["agent_id", "post_id", "message"],
+    },
+  },
+  {
     name: "meta_get_instagram_account",
     description: "Get basic info about an Instagram professional account (username, follower count)",
     inputSchema: {
@@ -88,6 +108,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     case "meta_create_page_post":
       await requireCapability(args.agent_id as string | undefined, REQUIRED_CAPABILITY);
       result = await client.createPagePost(args.page_id as string, args.message as string);
+      break;
+    case "meta_create_page_comment":
+      await requireCapability(args.agent_id as string | undefined, REQUIRED_CAPABILITY);
+      result = await client.createPostComment(args.post_id as string, args.message as string);
       break;
     case "meta_get_instagram_account":
       result = await client.getInstagramAccount(args.ig_user_id as string);
